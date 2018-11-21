@@ -15,31 +15,33 @@ limitations under the License.
 
 
 import apisauce from 'apisauce';
+import * as storage from '../services/Storage';
+import * as AuthActions from '../redux/AuthRedux';
 
 
 /**
- * 
+ *
  * Encapsulated service that eases configuration and other
  * API-related tasks.
- * 
+ *
  * @example
  *    const api = API.create(...)
  *    api.login(...)
  *
  * If you would like to use this service in sagas, pass it as an
  * argument and then:
- * 
+ *
  * @example
  *    yield call(api.login, ...)
- *  
+ *
  */
-const create = (baseURL = '') => {
+const create = (baseURL = 'http://localhost:8000/api/') => {
 
   /**
-   * 
+   *
    * Create and configure API object
-   * 
-   * 
+   *
+   *
    */
   const api = apisauce.create({
     baseURL
@@ -47,24 +49,89 @@ const create = (baseURL = '') => {
 
 
   /**
-   * 
-   * Definitions
-   * 
-   * 
+   *
+   * Transforms
+   *
+   *
    */
-  const getRoot = () => api.get('');
-  const login = (creds) => api.post('login', creds);
+  api.addResponseTransform(res => {
+    switch (res.problem) {
+      case 'TIMEOUT_ERROR':
+        alert('Server is not responding. Please try again later.');
+        return;
+      case 'NETWORK_ERROR':
+        alert('Server currently unavailable. Please try again later.');
+        return;
+      case 'CONNECTION_ERROR':
+        alert('Cannot connect to server. Please try again later.');
+        return;
+      default:
+        break;
+    }
+
+    switch (res.status) {
+      case 200:
+        break;
+      case 401:
+        AuthActions.logout();
+        break;
+      default:
+        alert(res.data.message);
+        break;
+    }
+  });
+
+  api.addRequestTransform(req => {
+    req.headers['Authorization'] = storage.getToken();
+  });
+
+
+  /**
+   *
+   * Definitions
+   *
+   *
+   */
+  const me = () => {
+    const id = storage.get('user_id');
+    return api.get(`users/${id}`);
+  }
+
+  const getOpenProposals = () => {
+    const id = storage.get('user_id');
+    return api.get(`users/${id}/proposals/open`);
+  }
+
+
+  const approveProposals = (id, body) => api.patch(`proposals/${id}`, body);
+  const createRole = (payload) => api.post('roles', payload);
+  const login = (creds) => api.post('authorization', creds);
+  const getProposal = (id) => api.get(`proposals/${id}`);
   const getRequesterBase = () => api.get('me/base');
-  const getPack = (id) => api.get(`${id}`);
+  const getRole = (id) => api.get(`roles/${id}`);
+  const getRoles = () => api.get('roles');
+  const getRoot = () => api.get('');
+  const getUser = (id) => api.get(`users/${id}`);
+  const requestAccess = (id, body) => api.post(`roles/${id}/members`, body);
   const search = (query) => api.post('', { q: query });
+  const signup = (creds) => api.post('users', creds);
 
 
   return {
-    getRoot,
+    approveProposals,
+    createRole,
     login,
+    getOpenProposals,
+    getProposal,
     getRequesterBase,
-    getPack,
-    search
+    getRole,
+    getRoles,
+    getRoot,
+    getUser,
+    me,
+    requestAccess,
+    search,
+    signup
   }
 
 }

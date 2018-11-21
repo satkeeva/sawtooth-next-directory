@@ -16,25 +16,40 @@ limitations under the License.
 
 import { createReducer, createActions } from 'reduxsauce';
 import Immutable from 'seamless-immutable';
+import * as utils from '../services/Utils';
 
 
 /**
- * 
+ *
  * Actions
- * 
+ *
  * @property request  Initiating action
  * @property success  Action called on execution success
  * @property failure  Action called on execution failure
- * 
+ *
  */
 const { Types, Creators } = createActions({
   baseRequest:       null,
   baseSuccess:       ['base'],
   baseFailure:       ['error'],
 
-  packRequest:       ['id'],
-  packSuccess:       ['activePack'],
-  packFailure:       ['error']
+  roleRequest:       ['id'],
+  roleSuccess:       ['role'],
+  roleFailure:       ['error'],
+
+  rolesRequest:      ['ids'],
+
+  proposalRequest:   ['id'],
+  proposalSuccess:   ['proposal'],
+  proposalFailure:   ['error'],
+
+  proposalsRequest:  ['ids'],
+
+  accessRequest:     ['id', 'userId', 'reason'],
+  accessSuccess:     null,
+  accessFailure:     null,
+
+  resetAll:          null,
 });
 
 
@@ -43,85 +58,189 @@ export default Creators;
 
 
 /**
- * 
+ *
  * State
- * 
+ *
  * @property recommended
  * @property requests
  * @property fetching
- * @property activePack
+ * @property activeRole
  * @property error
- * 
+ *
  * @todo Consider normalizing recommended, requests, and packs
  * into one roles entity, queried by selector
- * 
+ *
  */
 export const INITIAL_STATE = Immutable({
+  activeProposal:   null,
+  activeRole:       null,
+  error:            null,
+  fetching:         null,
   recommended:      null,
   requests:         null,
-  fetching:         null,
-  activePack:       null,
-  error:            null
+  roles:            null,
 });
 
 
 /**
- * 
+ *
  * Selectors
- * 
- * 
+ *
+ *
  */
 export const RequesterSelectors = {
-  activePack:   (state) => state.requester.activePack,
-  recommended:  (state) => state.requester.recommended,
-  requests:     (state) => state.requester.requests,
 
-  idFromSlug: (collection, slug) => {
+  roles: (state) => state.requester.roles,
+  recommended: (state) =>
+    state.requester.roles &&
+    state.user.me &&
+    state.requester.roles.filter(role =>
+      !state.user.me.proposals.find(proposal =>
+        proposal['object_id'] === role.id
+      )
+  ),
+
+  // Retrieve role by ID
+  roleFromId: (state, id) =>
+    state.requester.roles &&
+    state.requester.roles.find(role =>
+      role.id === id
+  ),
+
+  // Retrieve proposal by ID
+  proposalFromId: (state, id) =>
+    state.requester.requests &&
+    state.requester.requests.find(request =>
+      request.id === id
+  ),
+
+  // Retrieve user requests (proposals)
+  requests: (state) =>
+    state.user.me &&
+    state.requester.roles &&
+    state.requester.requests &&
+    state.requester.requests
+      .filter(request => request.status === 'OPEN')
+      .map(request => {
+        return {
+          ...request,
+          ...state.requester.roles
+            .find(role => role.id === request['object'])
+        }
+      }
+  ),
+
+  /**
+   *
+   * Retrieve field ID from URL slug
+   *
+   * @param state       Redux state object
+   * @param collection  Collection to search
+   * @param slug        ID from URL
+   * @param field       ID to retrieve
+   *
+   */
+  idFromSlug: (state, collection, slug, field) => {
     if (!collection) return null;
 
-    const pack = collection.find((item) => item.slug === slug);
-    return pack && pack.id;
+    let result = {};
+    field = field || 'id';
+
+    const entity = collection.find((item) =>
+      utils.createSlug(item.name) === slug);
+
+    switch (field) {
+      case 'proposal_id':
+        result = state.user.me && entity &&
+        state.user.me.proposals.find((item) =>
+          item['object_id'] === entity.id);
+        break;
+
+      default:
+        result = entity;
+        break;
+    }
+
+    return result && result[field];
   }
 };
 
 
 /**
- * 
+ *
  * Reducers - General
- * 
- * 
+ *
+ *
  */
-export const request = (state) => state.merge({ fetching: true });
+export const request = (state) => {
+  return state.merge({ fetching: true });
+}
 export const failure = (state, { error }) => {
   return state.merge({ fetching: false, error });
 }
+export const resetAll = () => {
+  return INITIAL_STATE;
+};
 
 
 /**
- * 
+ *
  * Reducers - Success
- * 
- * 
+ *
+ *
  */
-export const packSuccess = (state, { activePack }) => {
-  return state.merge({ fetching: false, activePack });
+export const roleSuccess = (state, { role }) => {
+  return state.merge({
+    fetching: false,
+    roles: utils.merge(state.roles || [], [role])
+  });
+}
+
+export const proposalSuccess = (state, { proposal }) => {
+  return state.merge({
+    fetching: false,
+    requests: utils.merge(state.requests || [], [proposal])
+  });
 }
 
 export const baseSuccess = (state, { base }) => {
   return state.merge({
     fetching: false,
-    recommended: base.recommended,
-    requests: base.requests
+    roles: utils.merge(state.roles || [], base || [])
   });
 }
 
+export const accessSuccess = (state) => {
+  return state.merge({ fetching: false });
+}
 
+
+/**
+ *
+ * Hooks
+ *
+ *
+ */
 export const reducer = createReducer(INITIAL_STATE, {
+  [Types.RESET_ALL]: resetAll,
+
   [Types.BASE_REQUEST]: request,
   [Types.BASE_SUCCESS]: baseSuccess,
   [Types.BASE_FAILURE]: failure,
 
-  [Types.PACK_REQUEST]: request,
-  [Types.PACK_SUCCESS]: packSuccess,
-  [Types.PACK_FAILURE]: failure
+  [Types.ROLE_REQUEST]: request,
+  [Types.ROLE_SUCCESS]: roleSuccess,
+  [Types.ROLE_FAILURE]: failure,
+
+  [Types.ROLES_REQUEST]: request,
+
+  [Types.PROPOSAL_REQUEST]: request,
+  [Types.PROPOSAL_SUCCESS]: proposalSuccess,
+  [Types.PROPOSAL_FAILURE]: failure,
+
+  [Types.PROPOSALS_REQUEST]: request,
+
+  [Types.ACCESS_REQUEST]: request,
+  [Types.ACCESS_SUCCESS]: accessSuccess,
+  [Types.ACCESS_FAILURE]: failure
 });

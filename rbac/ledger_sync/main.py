@@ -15,14 +15,13 @@
 
 import argparse
 import logging
-import os
 import sys
 import time
+import os
 
 from rbac.ledger_sync.database import Database
 from rbac.ledger_sync.deltas.handlers import get_delta_handler
 from rbac.ledger_sync.subscriber import Subscriber
-from rethinkdb import ReqlError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,19 +29,11 @@ LOGGER = logging.getLogger(__name__)
 # likely genesis, defeating the purpose. Rewind just 15 blocks to handle forks.
 KNOWN_COUNT = 15
 
-
-def getenv(name, default):
-    value = os.getenv(name)
-    if value is None or value is "":
-        return default
-    return value
-
-
-VALIDATOR_HOST = getenv("VALIDATOR_HOST", "validator")
-VALIDATOR_PORT = getenv("VALIDATOR_PORT", "4004")
-DB_HOST = getenv("DB_HOST", "rethink")
-DB_PORT = getenv("DB_PORT", "28015")
-DB_NAME = getenv("DB_NAME", "rbac")
+VALIDATOR_HOST = os.getenv("VALIDATOR_HOST", "validator")
+VALIDATOR_PORT = os.getenv("VALIDATOR_PORT", "4004")
+DB_HOST = os.getenv("DB_HOST", "rethink")
+DB_PORT = os.getenv("DB_PORT", "28015")
+DB_NAME = os.getenv("DB_NAME", "rbac")
 
 
 def parse_args(args):
@@ -88,7 +79,7 @@ def get_last_known_blocks(database):
         try:
             count = count + 1
             return database.last_known_blocks(KNOWN_COUNT)
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             if count > 3:
                 LOGGER.error(
                     "Tried to get last known block for more than 3 times. Reporting Error ..."

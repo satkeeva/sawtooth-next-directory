@@ -27,25 +27,25 @@ import './Expiring.css';
 
 
 /**
- * 
+ *
  * @class Expiring
  * Expiring component
- * 
+ *
  */
 class Expiring extends Component {
 
   render () {
     return (
-      <Grid id='next-approver-grid' celled='internally'>
+      <Grid id='next-approver-grid'>
 
         <Grid.Column
           id='next-approver-grid-track-column'
-          width={10}>
+          width={11}>
           <TrackHeader title='About to Expire' {...this.props}/>
         </Grid.Column>
         <Grid.Column
           id='next-approver-grid-converse-column'
-          width={6}>
+          width={5}>
           <Chat {...this.props}/>
         </Grid.Column>
 

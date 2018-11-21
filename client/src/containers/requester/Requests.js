@@ -16,73 +16,98 @@ limitations under the License.
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Grid } from 'semantic-ui-react';
-
-
-import Chat from '../../components/chat/Chat';
-import { RequesterSelectors } from '../../redux/RequesterRedux';
-
-
+import { Container, Grid } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 
+import { RequesterSelectors } from '../../redux/RequesterRedux';
+
+
+import Chat from '../../components/chat/Chat';
 import TrackHeader from '../../components/layouts/TrackHeader';
-import RolesList from '../../components/layouts/RolesList';
+import ApprovalCard from '../../components/layouts/ApprovalCard';
+import MemberList from '../../components/layouts/MemberList';
 
 
 import './Requests.css';
 
 
 /**
- * 
+ *
  * @class Requests
  * *Your Requests* component
- * 
+ *
  */
 export class Requests extends Component {
 
-  /**
-   * 
-   * 
-   * 
-   */
   componentDidMount () {
-    const { getPack, packId } = this.props;
-    getPack(packId);
+    const { getRole, getProposal, roleId, proposalId } = this.props;
+
+    roleId && !this.role && getRole(roleId);
+    proposalId && !this.request && getProposal(proposalId);
   }
 
 
   /**
-   * 
+   *
    * Switch pack on ID change
-   * 
+   * TODO: Fix double request
+   *
+   *
    */
   componentWillReceiveProps (newProps) {
-    const { getPack, packId } = this.props;
+    const { getRole, getProposal, roleId, proposalId } = this.props;
 
-    if (newProps.packId !== packId) {
-      getPack(newProps.packId);
+    if (newProps.roleId !== roleId) {
+      getRole(newProps.roleId);
+    }
+
+    if (newProps.proposalId !== proposalId) {
+      getProposal(newProps.proposalId);
     }
   }
 
 
   render () {
-    const { activePack } = this.props;
-    const title = activePack && activePack.name;
+    const {
+      proposalId,
+      proposalFromId,
+      roleId,
+      roleFromId } = this.props;
+
+    this.role = roleFromId(roleId);
+    this.request = proposalFromId(proposalId);
+    if (!this.role || !this.request) return null;
+
 
     return (
-      <Grid id='next-requester-grid' celled='internally'>
+      <Grid id='next-requester-grid'>
 
         <Grid.Column
           id='next-requester-grid-track-column'
-          width={10}>
-          <TrackHeader title={title} {...this.props}/>
-          <RolesList {...this.props}/>
+          width={11}>
+
+          <TrackHeader
+            roleImage
+            waves
+            title={this.role && this.role.name}
+            {...this.props}/>
+
+          <div id='next-requester-requests-content'>
+            <ApprovalCard request={this.request} {...this.props}/>
+            <Container id='next-requester-requests-description'>
+              Lorem ipsum dolor sit amet.
+            </Container>
+            <MemberList {...this.props}
+              members={this.role && this.role.members}
+              owners={this.role && this.role.owners}/>
+          </div>
+
         </Grid.Column>
         <Grid.Column
           id='next-requester-grid-converse-column'
-          width={6}>
-          <Chat {...this.props}/>
+          width={5}>
+          <Chat disabled {...this.props}/>
         </Grid.Column>
 
       </Grid>
@@ -95,10 +120,16 @@ export class Requests extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { id } = ownProps.match.params;
-  const { requests } = state.requester;
+  const { roles } = state.requester;
 
   return {
-    packId: RequesterSelectors.idFromSlug(requests, id)
+    roleId: RequesterSelectors.idFromSlug(state, roles, id),
+    proposalId: RequesterSelectors.idFromSlug(
+      state,
+      roles,
+      id,
+      'proposal_id'
+    )
   };
 }
 
@@ -110,11 +141,6 @@ export default connect(mapStateToProps, mapDispatchToProps)(Requests);
 
 
 Requests.proptypes = {
-  getPack: PropTypes.func,
-  activePack: PropTypes.arrayOf(PropTypes.shape(
-    {
-      name: PropTypes.string
-    }
-  ))
-
+  getRole: PropTypes.func,
+  getProposal: PropTypes.func,
 };

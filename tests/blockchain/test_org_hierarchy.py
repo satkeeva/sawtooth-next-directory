@@ -13,21 +13,18 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import sys
 import logging
-import pytest
 import unittest
-
 from uuid import uuid4
+import pytest
 from tests.blockchain.rbac_client import RbacClient
 from tests.blockchain.integration_test_helper import IntegrationTestHelper
 
+logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
-LOGGER.level = logging.DEBUG
-LOGGER.addHandler(logging.StreamHandler(sys.stdout))
 
 
-@pytest.mark.integration
+@pytest.mark.blockchain
 class TestOrgHierarchy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

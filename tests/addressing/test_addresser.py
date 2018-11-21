@@ -13,18 +13,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import pytest
 import logging
 import unittest
 from uuid import uuid4
-
-from rbac.addressing import addresser
-from rbac.addressing.addresser import AddressSpace
+import pytest
+from rbac.legacy import addresser
+from rbac.legacy.addresser import AddressSpace
 
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.unit
+@pytest.mark.library
 @pytest.mark.addressing
 class TestAddresser(unittest.TestCase):
     def test_sysadmin_addresses(self):

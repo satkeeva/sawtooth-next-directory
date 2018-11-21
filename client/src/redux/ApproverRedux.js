@@ -16,36 +16,31 @@ limitations under the License.
 
 import { createReducer, createActions } from 'reduxsauce';
 import Immutable from 'seamless-immutable';
+import * as utils from '../services/Utils';
 
 
 /**
- * 
+ *
  * Actions
- * 
+ *
  * @property
  * @property
- * 
+ *
  */
 const { Types, Creators } = createActions({
-  batchRequest:           ['userId'],
-  batchSuccess:           null,
-  batchFailure:           ['error'],
+  openProposalsRequest:     null,
+  openProposalsSuccess:     ['openProposals'],
+  openProposalsFailure:     ['error'],
 
-  rolesRequest:           ['userId'],
-  rolesSuccess:           null,
-  rolesFailure:           ['error'],
+  createRoleRequest:        ['payload'],
+  createRoleSuccess:        ['success'],
+  createRoleFailure:        ['error'],
 
-  individualsRequest:     ['userId'],
-  individualsSuccess:     null,
-  individualsFailure:     ['error'],
+  approveProposalsRequest:  ['ids'],
+  approveProposalsSuccess:  ['closedProposal'],
+  approveProposalsFailure:  ['error'],
 
-  frequentRequest:        ['userId'],
-  frequentSuccess:        null,
-  frequentFailure:        ['error'],
-
-  nearExpiryRequest:      ['userId'],
-  nearExpirySuccess:      null,
-  nearExpiryFailure:      ['error']
+  resetAll:               null,
 });
 
 
@@ -54,64 +49,94 @@ export default Creators;
 
 
 /**
- * 
+ *
  * State
- * 
+ *
  * @property isAuthenticated
- * @property fetching 
- * @property error 
- * 
+ * @property fetching
+ * @property error
+ *
  */
 export const INITIAL_STATE = Immutable({
   fetching:         null,
-  error:            null
+  error:            null,
+  openProposals:    null,
 });
 
 
 /**
- * 
+ *
  * Selectors
- * 
- * 
+ *
+ *
  */
 export const ApproverSelectors = {
-  
+  openProposals:         (state) => state.approver.openProposals,
+  openProposalsByUser:   (state) =>
+    utils.groupBy(state.approver.openProposals, 'opener'),
+  openProposalsByRole:   (state) =>
+    utils.groupBy(state.approver.openProposals, 'object'),
+  openProposalsCount:    (state) =>
+    (state.approver.openProposals && state.approver.openProposals.length) || null
 };
 
 
-export const request = (state) => state.merge({ fetching: true });
-export const success = (state) => {
-  return state.merge({ fetching: false });
+/**
+ *
+ * Reducers - General
+ *
+ *
+ */
+export const request = (state) => {
+  return state.merge({ fetching: true });
 }
 export const failure = (state, { error }) => {
   return state.merge({ fetching: false, error });
 }
+export const resetAll = () => {
+  return INITIAL_STATE;
+};
 
 
 /**
- * 
- * Reducers
- * 
- * 
+ *
+ * Reducers - Success
+ *
+ *
+ */
+export const openProposalsSuccess = (state, { openProposals }) => {
+  return state.merge({ fetching: false, openProposals: openProposals.data });
+}
+export const createRoleSuccess = (state) => {
+  return state.merge({ fetching: false });
+}
+export const approveProposalsSuccess = (state, { closedProposal }) => {
+  return state.merge({
+    fetching: false,
+    openProposals: state.openProposals
+      .filter(proposal => proposal.id !== closedProposal['proposal_id'])
+  });
+}
+
+
+/**
+ *
+ * Hooks
+ *
+ *
  */
 export const reducer = createReducer(INITIAL_STATE, {
-  [Types.BATCH_REQUEST]: request,
-  [Types.BATCH_SUCCESS]: success,
-  [Types.BATCH_FAILURE]: failure,
+  [Types.RESET_ALL]: resetAll,
 
-  [Types.ROLES_REQUEST]: request,
-  [Types.ROLES_SUCCESS]: success,
-  [Types.ROLES_FAILURE]: failure,
+  [Types.OPEN_PROPOSALS_REQUEST]: request,
+  [Types.OPEN_PROPOSALS_SUCCESS]: openProposalsSuccess,
+  [Types.OPEN_PROPOSALS_FAILURE]: failure,
 
-  [Types.INDIVIDUALS_REQUEST]: request,
-  [Types.INDIVIDUALS_SUCCESS]: success,
-  [Types.INDIVIDUALS_FAILURE]: failure,
+  [Types.CREATE_ROLE_REQUEST]: request,
+  [Types.CREATE_ROLE_SUCCESS]: createRoleSuccess,
+  [Types.CREATE_ROLE_FAILURE]: failure,
 
-  [Types.FREQUENT_REQUEST]: request,
-  [Types.FREQUENT_SUCCESS]: success,
-  [Types.FREQUENT_FAILURE]: failure,
-
-  [Types.NEAR_EXPIRY_REQUEST]: request,
-  [Types.NEAR_EXPIRY_SUCCESS]: success,
-  [Types.NEAR_EXPIRY_FAILURE]: failure
+  [Types.APPROVE_PROPOSALS_REQUEST]: request,
+  [Types.APPROVE_PROPOSALS_SUCCESS]: approveProposalsSuccess,
+  [Types.APPROVE_PROPOSALS_FAILURE]: failure,
 });

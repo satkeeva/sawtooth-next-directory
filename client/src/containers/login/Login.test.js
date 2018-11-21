@@ -21,14 +21,18 @@ import { BrowserRouter } from 'react-router-dom';
 import Login from './Login';
 import createCustomStore from '../../createCustomStore';
 
+
 const store = createCustomStore();
+
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
 
+  const props = {};
+
   ReactDOM.render(
     <Provider store={store}>
-      <BrowserRouter><Login/></BrowserRouter>
+      <BrowserRouter><Login {...props}/></BrowserRouter>
     </Provider>, div
   );
 

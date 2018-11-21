@@ -13,17 +13,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import pytest
-import unittest
 import logging
+import unittest
 from uuid import uuid4
-from rbac.addressing import addresser
-from rbac.addressing.addresser import AddressSpace
+import pytest
+from rbac.legacy import addresser
+from rbac.legacy.addresser import AddressSpace
 
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.unit
+@pytest.mark.library
 @pytest.mark.addressing
 class TestTaskAdminsAddresser(unittest.TestCase):
     def test_determine_task_admin_addr(self):

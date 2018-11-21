@@ -19,30 +19,66 @@ import AuthActions from '../redux/AuthRedux';
 
 
 /**
- * 
- * Execute login API request
- * 
- * The login generator function executes a request to the
- * API and handles the response.
- * 
- * @param action
- * 
+ *
+ * Auth generators
+ *
+ * Each generator function executes a request to the
+ * API to retrieve data required to hydrate the UI.
+ *
+ * @param api     API object
+ * @param action  Redux action
+ *
+ * @generator login(...)
+ *            Authenticate a user
+ * @generator signup(...)
+ *            Create a new user account
+ * @generator logout(...)
+ *            Logout of current session
+ *
+ *
  */
 export function * login (api, action) {
   try {
     const { username, password } = action;
     const res = yield call(api.login, {
-      username: username,
+      id: username,
       password: password
     });
 
-    if (res.ok) {
-      console.log('Authentication successful.');
-      yield put(AuthActions.loginSuccess(true));
-    } else {
-      alert(res.data.error);
-      yield put(AuthActions.loginFailure(res.data.error));
-    }
+    res.ok ?
+      yield put(AuthActions.loginSuccess(true, res.data.data)) :
+      yield put(AuthActions.loginFailure(res.data.message));
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
+export function * signup (api, action) {
+  try {
+    const { username, password, name, email } = action;
+    const res = yield call(api.signup, {
+      username: username,
+      password: password,
+      email: email,
+      name: name
+    });
+
+    res.ok ?
+      yield put(AuthActions.signupSuccess(true, res.data.data)) :
+      yield put(AuthActions.signupFailure(res.data.message));
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
+export function * logout (api, action) {
+  try {
+    const res = yield call(api.logout);
+    res.ok ?
+      yield put(AuthActions.logoutSuccess()) :
+      yield put(AuthActions.logoutFailure(res.data.message));
   } catch (err) {
     console.error(err);
   }

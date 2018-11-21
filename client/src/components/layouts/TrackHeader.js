@@ -15,35 +15,57 @@ limitations under the License.
 
 
 import React, { Component } from 'react';
-
-
+import { Header, Image, Grid } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 
 import './TrackHeader.css';
+import roleAvatar from '../../images/role-avatar.png';
 
 
 /**
- * 
- * @class TrackHeader
- * Component encapsulating the track pane header
- * 
+ *
+ * @class         TrackHeader
+ * @description   Component encapsulating the track pane header
+ *
+ *
  */
 export default class TrackHeader extends Component {
 
   render () {
-    const { title } = this.props;
+    const { roleImage, subtitle, title, waves } = this.props;
 
     return (
-      <div>
-        <div id='next-requester-track-header-container'>
-          <h1>{title}</h1>
-        </div>
-        <div id='next-wave-container'>
-          <div id='next-wave'></div>
-          <div id='next-wave-alt'></div>
-        </div>
-      </div>
+      <Grid>
+        <Grid.Column id='track-header-outer-grid' only='computer'>
+          <div id={waves ? 'next-track-header-waves-container' :
+            'next-track-header-container' }>
+            <div id='next-track-header'>
+              { title &&
+                <Header as='h1' inverted>
+                  { roleImage &&
+                    <Image circular size='large' src={roleAvatar}/>
+                  }
+                  <Header.Content>
+                    {title}
+                    <Header.Subheader id='next-track-header-subheader'>
+                      {subtitle}
+                    </Header.Subheader>
+                  </Header.Content>
+                </Header>
+              }
+            </div>
+
+            { waves &&
+              <div id='next-wave-container'>
+                <div id='next-wave'></div>
+                <div id='next-wave-alt'></div>
+              </div>
+            }
+          </div>
+        </Grid.Column>
+      </Grid>
+
     );
   }
 

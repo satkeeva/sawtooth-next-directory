@@ -15,74 +15,137 @@ limitations under the License.
 
 
 import React, { Component } from 'react';
-import { Segment } from 'semantic-ui-react';
+import { Header, Icon, Image, Segment } from 'semantic-ui-react';
 
 
+import './Chat.css';
 import ChatForm from '../forms/ChatForm';
 import ChatMessage from './ChatMessage';
-import './Chat.css';
+import * as utils from '../../services/Utils';
+
+
+import chatRequester from '../../mock_data/conversation_action.json';
+import chatApprover from '../../mock_data/conversation_action.1.json';
 
 
 /**
- * 
+ *
  * @class Chat
  * Component encapsulating the chat widget
- * 
+ *
+ * TODO: Normalize all JSON objects behind a schema
+ *
  */
 export default class Chat extends Component {
 
   /**
-   * 
-   * Switch chat context when active pack changes 
-   * 
+   *
+   * Switch chat context when active pack changes
+   *
    */
   componentWillReceiveProps (newProps) {
-    const { activePack, getConversation } = this.props;
+    const { activeRole, getConversation } = this.props;
 
-    if (newProps.activePack !== activePack) {
-
-      // TODO: Normalize all JSON objects behind a schema
-      getConversation(newProps.activePack['conversation_id']);
+    if (newProps.activeRole !== activeRole) {
+      getConversation(newProps.activeRole['conversation_id']);
     }
   }
 
 
-  send (message) {
-    const { sendMessage } = this.props;
+  roleName = (roleId) => {
+    const { roleFromId } = this.props;
+    const role = roleFromId(roleId);
 
-    // TODO: Retrieve user from session
-    const payload = {
-      body: message,
-      from: { id: '519909ec-f0c8-4be9-ac62-d340161507b3', name: 'John Doe' }
-    };
-  
-    sendMessage(payload);
+    return role && role.name;
+  };
+
+
+  send (message, action) {
+    const {
+      activeRole,
+      approveProposals,
+      history,
+      me,
+      requestAccess,
+      selectedProposals,
+      type } = this.props;
+
+    if (action) {
+      switch (action.type) {
+        case 0:
+          if (type === 0) {
+            requestAccess(activeRole.id, me.id, 'some reason');
+            const slug = utils.createSlug(activeRole.name);
+            history.push(`/requests/${slug}`);
+          }
+          if (type === 1) {
+            approveProposals(selectedProposals);
+          }
+          break;
+
+        case 1:
+          alert('Cancel');
+          break;
+
+        default:
+          break;
+      }
+    }
   }
 
 
   render () {
-    const { messages } = this.props;
+    const {
+      messages,
+      selectedRoles,
+      selectedUsers,
+      title,
+      disabled,
+      type } = this.props;
+
+    // ! Temporary
+    const actions = type ? chatApprover.actions :
+      chatRequester.actions;
 
     return (
       <div id='next-chat-container'>
-        <div>
-          { messages &&
-            <ChatMessage {...this.props}/>
-          }
-
-          { messages && messages.length === 0 &&
-            <Segment inverted color='violet'>
-              <p>Approv is here to help you get access to groups,
-              approvals and everything in between.</p>
-              <p>I will recommended groups you should be a part of.
-              Tips ... faster approvals from managers!</p>
+        { title &&
+          <Header id='next-chat-header' size='small' inverted>
+            {title}
+            <Icon link name='pin' size='mini' className='pull-right'/>
+          </Header>
+        }
+        {
+          selectedUsers &&
+          <div id='next-chat-users-selection-container'>
+          { selectedUsers.map(user => (
+            <Image key={user} src='http://i.pravatar.cc/300' avatar/>
+          )) }
+          </div>
+        }
+        { selectedRoles &&
+          <div id='next-chat-roles-selection-container'>
+          { selectedRoles.map(role => (
+            <Segment key={role}>
+              { this.roleName(role) }
+              {/* <Checkbox
+                checked={!!role}
+                role={role}
+                label={this.roleName(role)}
+                onChange={handleProposalChange}/> */}
             </Segment>
-          }
-        </div>
-
+          )) }
+          </div>
+        }
+        { messages &&
+          <ChatMessage {...this.props}/>
+        }
 
         <div id='next-chat-conversation-dock'>
-          <ChatForm submit={(message) => this.send(message)}/>
+          <ChatForm
+            disabled={disabled}
+            actions={actions}
+            submit={(message, action) => this.send(message, action)}/>
         </div>
       </div>
     );

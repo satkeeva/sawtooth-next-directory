@@ -14,8 +14,33 @@ limitations under the License.
 ----------------------------------------------------------------------------- */
 
 
-#next-requester-track-header-container {
-  padding: 30px 40px 15px 40px;
+#next-track-header-container {
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+}
+
+#next-track-header-waves-container {
+  position: fixed;
+  width: 100%;
+}
+
+#next-track-header {
+  align-items: center;
+  background: -webkit-linear-gradient(top, #7a26a8 0%,#e51e96 100%);
+  color: var(--header-color);
+  display: flex;
+  height: var(--track-header-height);
+  padding: 0 var(--page-content-padding);
+}
+
+#next-track-header .ui.header {
+  align-items: end;
+  display: flex;
+}
+
+#next-track-header .ui.header .content {
+  margin: 4px;
 }
 
 #next-wave,
@@ -31,4 +56,17 @@ limitations under the License.
 
 #next-wave-alt {
   background: url('../../images/wave-alt.svg');
+}
+
+#next-wave-container {
+  background: -webkit-linear-gradient(top, #de209d 0%,#ea4c9d 100%);
+  height: 41px;
+  position: relative;
+  top: -3px;
+}
+
+#next-track-header-subheader {
+  font-size: .45em;
+  margin-top: 7px;
+  min-height: 15px;
 }

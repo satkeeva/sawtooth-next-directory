@@ -14,6 +14,12 @@ limitations under the License.
 ----------------------------------------------------------------------------- */
 
 
+#next-global-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#next-global-container,
 #next-outer-grid {
   height: 100%;
   margin: 0;
@@ -21,8 +27,29 @@ limitations under the License.
 
 #next-outer-grid-nav {
   background: var(--nav-bg-color);
+  flex: 0 0 245px;
+  padding: 0;
+  z-index: 5;
 }
 
 #next-inner-grid-main {
+  flex: 1;
   padding: 0;
+}
+
+#next-hamburger-icon {
+  position: absolute;
+  top: 50px;
+  left: 15px;
+  padding: 0px;
+  cursor: pointer;
+  z-index: 3;
+}
+
+#next-hamburger-wrapper{
+  padding: 25px;
+}
+
+.pushable>.pusher {
+  height: 100%;
 }

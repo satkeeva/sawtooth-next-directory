@@ -32,7 +32,9 @@ it('renders without crashing', () => {
   const div = document.createElement('div');
 
   const props = {
-    getPack: () => {},
+    getRole: () => {},
+    roleFromId: () => {},
+    proposalFromId: () => {},
     match: { params: {} },
     requester: { requests: [] }
   };

@@ -13,16 +13,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import pytest
-import unittest
 import logging
+import unittest
 from hashlib import sha512
-from rbac.addressing import addresser
+import pytest
+
+from rbac.legacy import addresser
 
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.unit
+@pytest.mark.library
 @pytest.mark.addressing
 class TestAddresser(unittest.TestCase):
     def test_namespace(self):
@@ -30,8 +31,8 @@ class TestAddresser(unittest.TestCase):
 
         namespace = sha512(addresser.FAMILY_NAME.encode()).hexdigest()[:6]
 
-        self.assertEqual(addresser.NS, namespace)
-        self.assertEqual(addresser.NS, "9f4448")
+        self.assertEqual(addresser.NAMESPACE, namespace)
+        self.assertEqual(addresser.NAMESPACE, "9f4448")
 
     def test_short_address(self):
         """Tests that an address that is too short does not validate.

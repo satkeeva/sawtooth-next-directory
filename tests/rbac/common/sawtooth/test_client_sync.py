@@ -12,72 +12,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------------
+"""Test the Sawtooth REST client"""
+
+# pylint: disable=too-many-branches
 
 import logging
 from base64 import b64decode
 import pytest
 
-from rbac.addressing import addresser
-from rbac.addressing.addresser import AddressSpace
-from rbac.common.sawtooth.client_sync import ClientSync
+from rbac.common import addresser
+from rbac.common.sawtooth import client
 from rbac.common.protobuf import proposal_state_pb2
 from rbac.common.protobuf import role_state_pb2
 from rbac.common.protobuf import task_state_pb2
 from rbac.common.protobuf import user_state_pb2
-from tests.rbac.common.sawtooth.batch_assertions import BatchAssertions
+from tests.rbac.common.assertions import TestAssertions
 
 LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
 @pytest.mark.client_sync
-class TestRestClient(BatchAssertions):
-    def __init__(self, *args, **kwargs):
-        BatchAssertions.__init__(self, *args, **kwargs)
-        self.client = ClientSync()
+class TestRestClient(TestAssertions):
+    """Test the Sawtooth REST client"""
 
     @pytest.mark.state
     @pytest.mark.skip("too expensive if large chain, refactor elsewhere")
     def test_state(self):
-        subtree = addresser.NS
-        for item in self.client.list_state(subtree=subtree)["data"]:
+        """Grab the entire blockchain state and deserialize it"""
+        subtree = addresser.family.namespace
+        for item in client.list_state(subtree=subtree)["data"]:
             address_type = item["address_type"] = addresser.address_is(item["address"])
-            if address_type == AddressSpace.USER:
+            if address_type == addresser.AddressSpace.USER:
                 content = user_state_pb2.UserContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.PROPOSALS:
+            elif address_type == addresser.AddressSpace.PROPOSALS:
                 content = proposal_state_pb2.ProposalsContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.SYSADMIN_ATTRIBUTES:
+            elif address_type == addresser.AddressSpace.SYSADMIN_ATTRIBUTES:
                 content = "SYSADMIN_ATTRIBUTES"
-            elif address_type == AddressSpace.SYSADMIN_MEMBERS:
+            elif address_type == addresser.AddressSpace.SYSADMIN_MEMBERS:
                 content = "SYSADMIN_MEMBERS"
-            elif address_type == AddressSpace.SYSADMIN_OWNERS:
+            elif address_type == addresser.AddressSpace.SYSADMIN_OWNERS:
                 content = "SYSADMIN_OWNERS"
-            elif address_type == AddressSpace.SYSADMIN_ADMINS:
+            elif address_type == addresser.AddressSpace.SYSADMIN_ADMINS:
                 content = "SYSADMIN_ADMINS"
-            elif address_type == AddressSpace.ROLES_ATTRIBUTES:
+            elif address_type == addresser.AddressSpace.ROLES_ATTRIBUTES:
                 content = role_state_pb2.RoleAttributesContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.ROLES_MEMBERS:
+            elif address_type == addresser.AddressSpace.ROLES_MEMBERS:
                 content = role_state_pb2.RoleRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.ROLES_OWNERS:
+            elif address_type == addresser.AddressSpace.ROLES_OWNERS:
                 content = role_state_pb2.RoleRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.ROLES_ADMINS:
+            elif address_type == addresser.AddressSpace.ROLES_ADMINS:
                 content = role_state_pb2.RoleRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.ROLES_TASKS:
+            elif address_type == addresser.AddressSpace.ROLES_TASKS:
                 content = role_state_pb2.RoleRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.TASKS_ATTRIBUTES:
+            elif address_type == addresser.AddressSpace.TASKS_ATTRIBUTES:
                 content = task_state_pb2.TaskAttributesContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.TASKS_OWNERS:
+            elif address_type == addresser.AddressSpace.TASKS_OWNERS:
                 content = task_state_pb2.TaskRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
-            elif address_type == AddressSpace.TASKS_ADMINS:
+            elif address_type == addresser.AddressSpace.TASKS_ADMINS:
                 content = task_state_pb2.TaskRelationshipContainer()
                 content.ParseFromString(b64decode(item["data"]))
             else:

@@ -17,15 +17,35 @@ limitations under the License.
 #next-chat-container {
   height: 100%;
   position: relative;
+  z-index: 99;
 }
 
 #next-chat-conversation-dock {
   bottom: 0;
   position: absolute;
+  text-align: center;
   width: 100%;
 }
 
 .next-chat-message-left,
 .next-chat-message-right {
   max-width: 290px;
+}
+
+#next-chat-actions {
+  margin-top: 15px;
+}
+
+#next-chat-roles-selection-container {
+  position: relative;
+  top: 100px;
+}
+
+#next-chat-header {
+  padding: 10px;
+}
+
+#next-chat-header i.mini {
+  font-size: 1.1em;
+  margin: 0;
 }

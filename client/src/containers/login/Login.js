@@ -16,67 +16,77 @@ limitations under the License.
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Grid } from 'semantic-ui-react';
-
-
+import { Link } from 'react-router-dom';
+import { Container, Grid, Header, Image } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 
 import './Login.css';
 import AuthActions, { AuthSelectors } from '../../redux/AuthRedux';
-import LoginForm from '../../components/forms/LoginForm'
+import LoginForm from '../../components/forms/LoginForm';
+import * as utils from '../../services/Utils';
+import logo from '../../images/next-logo-billboard.png';
 
 
 /**
- * 
- * @class Login
- * Component encapsulating the login landing page.
- * 
+ *
+ * @class         Login
+ * @description   Component encapsulating the login landing page
+ *
  */
 class Login extends Component {
 
-  componentWillMount () {
-    const { isAuthenticated } = this.props;
-    if (isAuthenticated) {
-      this.props.history.push('/home');
-    }
-  }
+  static propTypes = {
+    isAuthenticated: PropTypes.bool,
+    login: PropTypes.func.isRequired
+  };
 
-  /**
-   * 
-   * Once the user is authenticated, redirect to landing page
-   * 
-   * @param {*} newProps 
-   * 
-   */
-  componentWillReceiveProps (newProps) {
-    if (newProps.isAuthenticated) {
 
-      // TODO: Consider pulling from a user-saved cache
-      this.props.history.push('/home');
-    }
+  componentWillMount() {
+    const { history, isAuthenticated, recommended } = this.props;
+
+    const homeLink = recommended && recommended[0] ?
+      `/roles/${utils.createSlug(recommended[0].name)}` :
+      '/';
+
+    isAuthenticated && history.push(homeLink);
   }
 
 
-  render () {
-    const { attemptLogin } = this.props;
+  componentWillReceiveProps(newProps) {
+    const { history, recommended } = this.props;
+
+    const homeLink = recommended && recommended[0] ?
+    `/roles/${utils.createSlug(recommended[0].name)}` :
+    '/';
+
+    newProps.isAuthenticated && history.push(homeLink);
+  }
+
+
+  render() {
+    const { login } = this.props;
 
     return (
-      <Grid centered columns={2}>
-        <Grid.Column className='next-login-column'>
-          <LoginForm submit={attemptLogin}/>
-        </Grid.Column>
-      </Grid>
+      <div id='next-login-container'>
+        <Grid container centered columns={2}>
+          <Grid.Column id='next-login-column'>
+            <Header color='grey' textAlign='center'>
+              <Image centered src={logo} id='next-login-logo'/>
+              <h1>Sign in to NEXT Directory</h1>
+            </Header>
+            <LoginForm submit={login}/>
+            <Container id='next-login-new-account-container' textAlign='center'>
+              <span>New to NEXT Directory?</span>
+              <Link to='/signup'>Create an account</Link>
+            </Container>
+          </Grid.Column>
+        </Grid>
+      </div>
     );
   }
 
 }
-
-
-Login.prototypes = {
-  isAuthenticated: PropTypes.bool,
-  attemptLogin: PropTypes.func.isRequired
-};
 
 
 const mapStateToProps = (state) => {
@@ -88,8 +98,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    attemptLogin: (email, password) => dispatch(AuthActions.loginRequest(email, password))
+    login: (email, password) =>
+      dispatch(AuthActions.loginRequest(email, password)),
+    attemptSignup: (name, username, password, email) =>
+      dispatch(AuthActions.signupRequest(name, username, password, email))
   };
 }
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

@@ -14,17 +14,43 @@ limitations under the License.
 ----------------------------------------------------------------------------- */
 
 
-#next-switch-approver-link {
-  bottom: 50px;
-  position: absolute;
-}
-
 .next-approver-nav-search,
 .next-approver-nav-search input,
 .next-approver-nav-search .ui {
   width: 100%;
 }
 
-#next-approver-nav-lists-container h3 {
+.next-approver-nav-search {
+  padding: var(--nav-list-padding);
+}
+
+#next-approver-nav-lists-container {
+  text-indent: var(--nav-list-padding);
+}
+
+#next-approver-nav-lists-container h4 a {
   color: var(--nav-heading-color);
+}
+
+.next-approver-nav-search .ui.input input {
+  background: #ffffff24;
+  border: none;
+  height: 44px;
+}
+
+#next-approver-switch-container {
+  bottom: 25px;
+  left: -4px;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+
+#next-approver-switch-container a {
+  color: var(--nav-heading-color);
+}
+
+#next-switch-approver-link {
+  bottom: 50px;
+  position: absolute;
 }

@@ -16,37 +16,146 @@ limitations under the License.
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Grid } from 'semantic-ui-react';
-
-
-import Chat from '../../components/chat/Chat';
-import TrackHeader from '../../components/layouts/TrackHeader';
+import { Grid, Header } from 'semantic-ui-react';
+import PropTypes from 'prop-types';
 
 
 import './Individuals.css';
+import Chat from '../../components/chat/Chat';
+import TrackHeader from '../../components/layouts/TrackHeader';
+import IndividualsNav from '../../components/nav/IndividualsNav';
+import PeopleList from '../../components/layouts/proposals/PeopleList';
+import RoleList from '../../components/layouts/proposals/RoleList';
+import { selectRoles, selectUser } from './IndividualsHelper';
 
 
 /**
- * 
- * @class Individuals
- * Individuals component
- * 
+ *
+ * @class       Individuals
+ * @description Individuals component
+ *
+ *
  */
 class Individuals extends Component {
 
+  state = {
+    selectedRoles:      [],
+    selectedUsers:      [],
+    selectedProposals:  [],
+    activeIndex:        0,
+  };
+
+
+  componentDidMount () {
+    const { getOpenProposals, openProposals } = this.props;
+    !openProposals && getOpenProposals();
+  }
+
+
+  setFlow = (index) => {
+    this.setState({
+      selectedRoles:      [],
+      selectedUsers:      [],
+      selectedProposals:  [],
+      activeIndex:        index,
+    });
+  };
+
+
+  /**
+   *
+   * Handle proposal change event
+   *
+   * When a proposal is checked or unchecked, select or deselect
+   * the parent user, taking into account the currently
+   * checked sibling proposals.
+   *
+   *
+   */
+  handleChange = (event, data) => {
+    const {
+      selectedRoles,
+      selectedProposals,
+      selectedUsers } = this.state;
+
+    const { openProposalsByUser } = this.props;
+
+    const { roles, proposals } = selectRoles(
+      data.checked,
+      data.proposals,
+      selectedProposals,
+      selectedRoles
+    ).next().value;
+
+    const { users } = selectUser(
+      data.checked,
+      data.user,
+      openProposalsByUser[data.user]
+        .filter(proposal => proposals
+          .includes(proposal.id)),
+      selectedUsers
+    ).next().value;
+
+    this.setState({
+      selectedRoles:      roles,
+      selectedProposals:  proposals,
+      selectedUsers:      users,
+    });
+  };
+
+
   render () {
+    const { openProposals } = this.props;
+    const {
+      activeIndex,
+      selectedProposals,
+      selectedRoles,
+      selectedUsers } = this.state;
+
     return (
-      <Grid id='next-approver-grid' celled='internally'>
+      <Grid id='next-approver-grid'>
+
+        <Grid.Column id='next-approver-grid-track-column' width={11}>
+          <TrackHeader
+            title='Individual Requests'
+            subtitle={openProposals && openProposals.length + ' pending'}
+            {...this.props}/>
+          <div id='next-approver-individuals-content'>
+            <IndividualsNav
+              activeIndex={activeIndex}
+              setFlow={this.setFlow}/>
+            { openProposals && openProposals.length !== 0 &&
+              <div>
+                { activeIndex === 0 &&
+                  <RoleList {...this.props}/>
+                }
+                { activeIndex === 1 &&
+                  <PeopleList
+                    selectedProposals={selectedProposals}
+                    selectedUsers={selectedUsers}
+                    handleChange={this.handleChange}
+                    {...this.props}/>
+                }
+              </div>
+            }
+            { openProposals && openProposals.length === 0 &&
+              <Header as='h3' textAlign='center'>
+                <Header.Content>No pending items</Header.Content>
+              </Header>
+            }
+          </div>
+        </Grid.Column>
 
         <Grid.Column
-          id='next-approver-grid-track-column'
-          width={10}>
-          <TrackHeader title='Individuals' {...this.props}/>
-        </Grid.Column>
-        <Grid.Column
           id='next-approver-grid-converse-column'
-          width={6}>
-          <Chat {...this.props}/>
+          width={5}>
+          <Chat
+            type={1}
+            selectedProposals={selectedProposals}
+            selectedRoles={selectedRoles}
+            selectedUsers={selectedUsers}
+            handleChange={this.handleChange}
+            {...this.props}/>
         </Grid.Column>
 
       </Grid>
@@ -65,3 +174,8 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Individuals);
+
+
+Individuals.proptypes = {
+  getOpenProposals: PropTypes.func
+};

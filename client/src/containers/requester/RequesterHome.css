@@ -16,6 +16,7 @@ limitations under the License.
 
 #next-requester-grid {
   height: 100%;
+  margin: 0;
 }
 
 #next-requester-grid-track-column {
@@ -24,4 +25,10 @@ limitations under the License.
 
 #next-requester-grid-converse-column {
   background: var(--chat-bg-color);
+}
+
+#next-requester-landing-container {
+  background: url('../../images/next-logo-landing.gif') 50% 45% / 250px no-repeat;
+  height: 100%;
+  opacity: 0.25;
 }

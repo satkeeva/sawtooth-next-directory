@@ -13,25 +13,24 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import sys
 import logging
-import pytest
 import unittest
+import pytest
+
+from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from tests.blockchain.rbac_client import RbacClient
 from tests.blockchain.integration_test_helper import IntegrationTestHelper
 from rbac.transaction_creation.common import Key
-from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 BATCHER_PRIVATE_KEY = Secp256k1PrivateKey.new_random().as_hex()
 BATCHER_KEY = Key(BATCHER_PRIVATE_KEY)
 
+logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
-LOGGER.level = logging.DEBUG
-LOGGER.addHandler(logging.StreamHandler(sys.stdout))
 
 
-@pytest.mark.integration
+@pytest.mark.blockchain
 class TestUserOperations(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

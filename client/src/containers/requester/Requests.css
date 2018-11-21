@@ -12,3 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ----------------------------------------------------------------------------- */
+
+
+#next-requester-requests-content {
+  padding: 0 var(--page-content-padding);
+  position: relative;
+  top: 190px;
+}
+
+#next-requester-requests-description {
+  margin: 30px 0;
+}

@@ -17,15 +17,19 @@ limitations under the License.
 import { combineReducers } from 'redux';
 
 
+import { reducer as ApproverReducer } from './ApproverRedux';
 import { reducer as AuthReducer } from './AuthRedux';
 import { reducer as ChatReducer } from './ChatRedux';
 import { reducer as RequesterReducer } from './RequesterRedux';
+import { reducer as UserReducer } from './UserRedux';
 
 
 const reducers = combineReducers({
+  approver:   ApproverReducer,
   auth:       AuthReducer,
   chat:       ChatReducer,
-  requester:  RequesterReducer
+  requester:  RequesterReducer,
+  user:       UserReducer
 });
 
 export default reducers;

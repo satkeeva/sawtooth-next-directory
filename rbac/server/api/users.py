@@ -36,7 +36,7 @@ from rbac.server.db import users_query
 from rbac.transaction_creation.common import Key
 from rbac.transaction_creation.user_transaction_creation import create_user
 from rbac.transaction_creation.manager_transaction_creation import propose_manager
-from rbac.common.crypto.secrets import generate_apikey
+from rbac.common.crypto.secrets import generate_api_key
 
 LOGGER = logging.getLogger(__name__)
 USERS_BP = Blueprint("users")
@@ -62,7 +62,7 @@ async def fetch_all_users(request):
 
 @USERS_BP.post("api/users")
 async def create_new_user(request):
-    required_fields = ["name", "username", "password"]
+    required_fields = ["name", "username", "password", "email"]
     utils.validate_fields(required_fields, request.json)
 
     # Generate keys
@@ -181,11 +181,12 @@ async def fetch_open_proposals(request, user_id):
 
 
 def create_user_response(request, public_key):
-    token = generate_apikey(request.app.config.SECRET_KEY, public_key)
+    token = generate_api_key(request.app.config.SECRET_KEY, public_key)
     user_resource = {
         "id": public_key,
         "name": request.json.get("name"),
         "username": request.json.get("username"),
+        "email": request.json.get("email"),
         "ownerOf": [],
         "administratorOf": [],
         "memberOf": [],

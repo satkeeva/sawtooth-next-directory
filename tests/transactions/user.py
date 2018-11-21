@@ -13,24 +13,26 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 
-import pytest
-import unittest
 import logging
+import unittest
+import pytest
+
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 from sawtooth_sdk.protobuf import batch_pb2
 from sawtooth_sdk.protobuf import transaction_pb2
-from rbac.addressing import addresser
-from rbac.addressing.addresser import AddressSpace
+
+from rbac.common import addresser
 from rbac.transaction_creation.common import Key
 from rbac.common.protobuf import user_transaction_pb2, rbac_payload_pb2
+from rbac.transaction_creation.user_transaction_creation import create_user
 from tests.transactions.common import SIGNATURE_LENGTH
 from tests.transactions.common import SIGNATURE_PATTERN
-from rbac.transaction_creation.user_transaction_creation import create_user
+
 
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.unit
+@pytest.mark.library
 @pytest.mark.transaction_creation
 class TestUserTransactionCreation(unittest.TestCase):
     def create_user_transaction(self, name, username, metadata):
@@ -72,8 +74,8 @@ class TestUserTransactionCreation(unittest.TestCase):
                 header.ParseFromString(transaction.header)
 
                 self.assertEqual(type(header), transaction_pb2.TransactionHeader)
-                self.assertEqual(header.family_name, addresser.FAMILY_NAME)
-                self.assertEqual(header.family_version, addresser.FAMILY_VERSION)
+                self.assertEqual(header.family_name, addresser.family.name)
+                self.assertEqual(header.family_version, addresser.family.version)
                 self.assertEqual(header.batcher_public_key, batch_key.public_key)
                 self.assertEqual(header.signer_public_key, txn_key.public_key)
 
@@ -84,11 +86,9 @@ class TestUserTransactionCreation(unittest.TestCase):
                 for address in header.inputs:
                     input_count += 1
                     self.assertEqual(type(address), str)
-                    self.assertEqual(len(address), addresser.ADDRESS_LENGTH)
-                    self.assertTrue(addresser.is_address(address))
-                    self.assertTrue(addresser.namespace_ok(address))
-                    self.assertTrue(addresser.is_family_address(address))
-                    self.assertEqual(addresser.address_is(address), AddressSpace.USER)
+                    self.assertEqual(
+                        addresser.address_is(address), addresser.AddressSpace.USER
+                    )
 
                 self.assertEqual(input_count, 1)
 
@@ -96,11 +96,9 @@ class TestUserTransactionCreation(unittest.TestCase):
                 for address in header.outputs:
                     output_count += 1
                     self.assertEqual(type(address), str)
-                    self.assertEqual(len(address), addresser.ADDRESS_LENGTH)
-                    self.assertTrue(addresser.is_address(address))
-                    self.assertTrue(addresser.namespace_ok(address))
-                    self.assertTrue(addresser.is_family_address(address))
-                    self.assertEqual(addresser.address_is(address), AddressSpace.USER)
+                    self.assertEqual(
+                        addresser.address_is(address), addresser.AddressSpace.USER
+                    )
 
                 self.assertEqual(output_count, 1)
 

@@ -16,7 +16,7 @@ limitations under the License.
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
-import { Button, Container, Search, Icon } from 'semantic-ui-react';
+import { Button, Icon, Input, Container, Search } from 'semantic-ui-react';
 
 
 import './RequesterNav.css';
@@ -24,41 +24,44 @@ import NavList from './NavList';
 
 
 /**
- * 
+ *
  * @class RequesterNav
  * Component encapsulating the template for the sidebar displayed
  * on the requester landing page.
- * 
+ *
  */
 export default class RequesterNav extends Component {
 
-  
-
   /**
-   * 
+   *
    * Render sidebar hierarchy
-   * 
+   *
    */
   renderLists () {
-    const { recommended, packs, requests } = this.props;
+    const { recommended, memberOf, requests, roleFromId } = this.props;
 
     return (
       <div id='next-requester-nav-lists-container'>
         <NavList
           dynamic
+          listTitle='Your Packs / Roles'
+          route='/roles'
+          list={memberOf && memberOf.map(roleId => roleFromId(roleId))}/>
+        <NavList
+          dynamic
           listTitle='Your Requests'
-          route='/home/requests'
+          route='/requests'
           list={requests}/>
         <NavList
           dynamic
           listTitle='Recommended Packs'
-          route='/home/recommended'
-          list={recommended}/>
+          route='/home/recommended-packs'
+          list={[]}/>
         <NavList
           dynamic
-          listTitle='Your Packs'
-          route='/home/packs'
-          list={packs}/>
+          listTitle='Recommended Roles'
+          route='/browse/roles'
+          list={recommended}/>
       </div>
     );
   }
@@ -68,23 +71,26 @@ export default class RequesterNav extends Component {
     return (
       <Container>
 
-        <Link to='/browse'>
-          <Button animated secondary fluid id='next-browse-button'>
-            <Button.Content visible>Browse Packs/Roles</Button.Content>
+        <Link to='/browse' id='next-requester-nav-browse'>
+          <Button animated primary fluid>
+            <Button.Content visible>BROWSE</Button.Content>
             <Button.Content hidden><Icon name='arrow right'/></Button.Content>
           </Button>
         </Link>
 
         <Search
+          input={() => <Input icon='search' placeholder='Search...'/>}
           className='next-requester-nav-search'
           category
           loading={false}/>
 
         { this.renderLists() }
 
-        <Link to='/approval-home' id='next-switch-requester-link'>
-          Switch to Approver
-        </Link>
+        <h4 id='next-requester-switch-container'>
+          <Link to='/approval/pending/individual'>
+            Switch to Approver
+          </Link>
+        </h4>
 
       </Container>
     );

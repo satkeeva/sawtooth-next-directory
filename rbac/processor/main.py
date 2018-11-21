@@ -14,6 +14,7 @@
 # -----------------------------------------------------------------------------
 
 import argparse
+import logging
 import sys
 import os
 
@@ -22,16 +23,12 @@ from sawtooth_sdk.processor.log import init_console_logging
 
 from rbac.processor.event_handler import RBACTransactionHandler
 
+LOGGER = logging.getLogger(__name__)
+LOGGER.level = logging.DEBUG
+LOGGER.addHandler(logging.StreamHandler(sys.stdout))
 
-def getenv(name, default):
-    value = os.getenv(name)
-    if value is None or value is "":
-        return default
-    return value
-
-
-VALIDATOR_HOST = getenv("VALIDATOR_HOST", "validator")
-VALIDATOR_PORT = getenv("VALIDATOR_PORT", "4004")
+VALIDATOR_HOST = os.getenv("VALIDATOR_HOST", "validator")
+VALIDATOR_PORT = os.getenv("VALIDATOR_PORT", "4004")
 
 
 def parse_args(args):
@@ -63,7 +60,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     except Exception as exe:  # pylint: disable=broad-except
-        print("Error: {}".format(exe), file=sys.stderr)
+        LOGGER.error("Error: %s", exe, file=sys.stderr)
     finally:
         if processor is not None:
             processor.stop()

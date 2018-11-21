@@ -15,22 +15,133 @@ limitations under the License.
 
 
 import React, { Component } from 'react';
+import { Icon, Image, Label, Menu, Header as MenuHeader } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+
 import './Header.css';
+import logo from '../../images/next-logo-primary.png';
 
 
 /**
- * 
+ *
  * @class Header
  * Component encapsulating the main application header
- * 
+ *
  */
 export default class Header extends Component {
 
-  render () {
+  state = { menuVisible: false };
+
+
+  componentDidMount() {
+    document.addEventListener(
+      'mousedown', this.handleClickOutside
+    );
+  }
+
+
+  componentWillUnmount() {
+    document.removeEventListener(
+      'mousedown', this.handleClickOutside
+    );
+  }
+
+
+  handleClickOutside = (event) => {
+    this.ref && !this.ref.contains(event.target) &&
+      this.setState({ menuVisible: false });
+  }
+
+
+  setRef = (node) => {
+    this.ref = node;
+  }
+
+
+  toggleMenu = () => {
+    const { menuVisible } = this.state;
+    this.setState({ menuVisible: !menuVisible });
+  }
+
+
+  logout = () => {
+    const { logout } = this.props;
+    this.toggleMenu();
+    logout();
+  }
+
+
+  renderMenu () {
+    const { me } = this.props;
+
     return (
-      <header className='next-header'>
-        <Link to='/home'>Next Directory</Link>
+      <div id='next-header-menu'>
+        <Menu inverted size='huge' vertical>
+          { me &&
+            <Menu.Item>
+              <MenuHeader as='h3'>
+                <Image
+                  avatar
+                  src='http://i.pravatar.cc/300'
+                  size='large'/>
+                <MenuHeader.Content>
+                  {me.name}
+                </MenuHeader.Content>
+              </MenuHeader>
+            </Menu.Item>
+          }
+          <Menu.Item onClick={() => {}}>
+            <MenuHeader as='h5'>
+              <Icon name='setting' color='grey'/>
+              <MenuHeader.Content>
+                Settings
+              </MenuHeader.Content>
+            </MenuHeader>
+          </Menu.Item>
+          <Menu.Item onClick={this.logout}>
+            <MenuHeader as='h5'>
+              <Icon name='sign out' color='grey'/>
+              <MenuHeader.Content>
+                Sign out
+              </MenuHeader.Content>
+            </MenuHeader>
+          </Menu.Item>
+        </Menu>
+      </div>
+    );
+  }
+
+
+  render () {
+    const { me, openProposalsCount } = this.props;
+    const { menuVisible } = this.state;
+
+    return (
+      <header className='next-header' ref={this.setRef}>
+        <div id='next-header-logo'>
+          <Image as={Link} to='/' src={logo} size='tiny'/>
+        </div>
+        { me &&
+        <div id='next-header-actions'>
+          <Icon inverted name='search'/>
+          <div id='next-header-bell'>
+            <Link to='/approval/pending/individual'>
+              <Icon inverted name='bell'/>
+              { openProposalsCount &&
+                <Label circular color='blue' floating size='mini'>
+                  {openProposalsCount}
+                </Label>
+              }
+            </Link>
+          </div>
+          { me &&
+            <Image
+              avatar
+              src='http://i.pravatar.cc/300'
+              onClick={this.toggleMenu}/> }
+        </div>
+        }
+        { menuVisible && this.renderMenu() }
       </header>
     );
   }

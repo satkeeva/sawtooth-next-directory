@@ -15,12 +15,11 @@
 
 from sawtooth_sdk.processor.exceptions import InvalidTransaction
 
-from rbac.addressing import addresser
+from rbac.common import addresser
 
 from rbac.processor import proposal_validator
 from rbac.processor.role import role_validator
 from rbac.processor import state_change
-from rbac.processor import state_accessor
 from rbac.processor.role import role_operation
 
 from rbac.common.protobuf import proposal_state_pb2
@@ -31,12 +30,12 @@ def apply_propose(header, payload, state):
     proposal_payload = role_transaction_pb2.ProposeAddRoleMember()
     proposal_payload.ParseFromString(payload.content)
 
-    role_members_address = addresser.make_role_members_address(
-        role_id=proposal_payload.role_id, user_id=proposal_payload.user_id
+    role_members_address = addresser.role.member.address(
+        proposal_payload.role_id, proposal_payload.user_id
     )
 
-    proposal_address = addresser.make_proposal_address(
-        object_id=proposal_payload.role_id, related_id=proposal_payload.user_id
+    proposal_address = addresser.proposal.address(
+        object_id=proposal_payload.role_id, target_id=proposal_payload.user_id
     )
 
     state_entries = role_validator.validate_role_rel_proposal(
@@ -48,10 +47,10 @@ def apply_propose(header, payload, state):
         object_id=proposal_payload.role_id,
         related_id=proposal_payload.user_id,
         proposal_address=proposal_address,
-        proposal_type=proposal_state_pb2.Proposal.ADD_ROLE_MEMBERS,
+        proposal_type=proposal_state_pb2.Proposal.ADD_ROLE_MEMBER,
     ):
         raise InvalidTransaction(
-            "There is already an open proposal for ADD_ROLE_MEMBERS "
+            "There is already an open proposal for ADD_ROLE_MEMBER "
             "with role id {} and user id {}".format(
                 proposal_payload.role_id, proposal_payload.user_id
             )
@@ -62,7 +61,7 @@ def apply_propose(header, payload, state):
         header=header,
         payload=proposal_payload,
         address=proposal_address,
-        proposal_type=proposal_state_pb2.Proposal.ADD_ROLE_MEMBERS,
+        proposal_type=proposal_state_pb2.Proposal.ADD_ROLE_MEMBER,
         state=state,
     )
 
@@ -71,12 +70,12 @@ def apply_propose_remove(header, payload, state):
     proposal_payload = role_transaction_pb2.ProposeRemoveRoleMember()
     proposal_payload.ParseFromString(payload.content)
 
-    role_members_address = addresser.make_role_members_address(
-        role_id=proposal_payload.role_id, user_id=proposal_payload.user_id
+    role_members_address = addresser.role.member.address(
+        proposal_payload.role_id, proposal_payload.user_id
     )
 
-    proposal_address = addresser.make_proposal_address(
-        object_id=proposal_payload.role_id, related_id=proposal_payload.user_id
+    proposal_address = addresser.proposal.address(
+        object_id=proposal_payload.role_id, target_id=proposal_payload.user_id
     )
 
     state_entries = role_validator.validate_role_rel_proposal(
@@ -88,10 +87,10 @@ def apply_propose_remove(header, payload, state):
         object_id=proposal_payload.role_id,
         related_id=proposal_payload.user_id,
         proposal_address=proposal_address,
-        proposal_type=proposal_state_pb2.Proposal.REMOVE_ROLE_MEMBERS,
+        proposal_type=proposal_state_pb2.Proposal.REMOVE_ROLE_MEMBER,
     ):
         raise InvalidTransaction(
-            "There is already an open proposal for REMOVE_ROLE_MEMBERS "
+            "There is already an open proposal for REMOVE_ROLE_MEMBER "
             "with role id {} and user id {}".format(
                 proposal_payload.role_id, proposal_payload.user_id
             )
@@ -102,7 +101,7 @@ def apply_propose_remove(header, payload, state):
         header=header,
         payload=proposal_payload,
         address=proposal_address,
-        proposal_type=proposal_state_pb2.Proposal.REMOVE_ROLE_MEMBERS,
+        proposal_type=proposal_state_pb2.Proposal.REMOVE_ROLE_MEMBER,
         state=state,
     )
 
@@ -119,8 +118,8 @@ def hierarchical_decide(header, payload, state, isApproval):
     confirm = role_transaction_pb2.ConfirmAddRoleAdmin()
     confirm.ParseFromString(payload.content)
 
-    txn_signer_owners_address = addresser.make_role_owners_address(
-        role_id=confirm.role_id, user_id=confirm.on_behalf_id
+    txn_signer_owners_address = addresser.role.owner.address(
+        confirm.role_id, confirm.on_behalf_id
     )
 
     role_operation.hierarchical_decide(
@@ -132,12 +131,12 @@ def apply_confirm(header, payload, state):
     confirm_payload = role_transaction_pb2.ConfirmAddRoleAdmin()
     confirm_payload.ParseFromString(payload.content)
 
-    role_member_address = addresser.make_role_members_address(
-        role_id=confirm_payload.role_id, user_id=confirm_payload.user_id
+    role_member_address = addresser.role.member.address(
+        confirm_payload.role_id, confirm_payload.user_id
     )
 
-    txn_signer_owners_address = addresser.make_role_owners_address(
-        role_id=confirm_payload.role_id, user_id=header.signer_public_key
+    txn_signer_owners_address = addresser.role.owner.address(
+        confirm_payload.role_id, header.signer_public_key
     )
 
     state_entries = role_validator.get_state_entries(
@@ -160,7 +159,7 @@ def apply_reject(header, payload, state):
     reject_payload = role_transaction_pb2.RejectAddRoleAdmin()
     reject_payload.ParseFromString(payload.content)
 
-    txn_signer_owners_address = addresser.make_role_owners_address(
+    txn_signer_owners_address = addresser.role.owner.address(
         reject_payload.role_id, header.signer_public_key
     )
 

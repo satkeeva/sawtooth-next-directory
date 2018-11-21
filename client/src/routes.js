@@ -26,101 +26,100 @@ import Packs from './containers/requester/Packs';
 
 import ApproverHome from './containers/approver/ApproverHome';
 import ApproverNav from './components/nav/ApproverNav';
-import Batch from './containers/approver/Batch';
-import Roles from './containers/approver/Roles';
 import Individuals from './containers/approver/Individuals';
-import Frequent from './containers/approver/Frequent';
 import Expiring from './containers/approver/Expiring';
+import Manage from './containers/approver/Manage';
+import People from './containers/approver/People';
 
 
 /**
- * 
+ *
  * Destructured routes
- * 
+ *
  * The routes in this array are destructured from the declarative
  * syntax due to the added complexity of navigation and state.
- * 
+ *
  * State is sent top-down via props to the main and nav
  * components.
- * 
+ *
  */
 const routes = (props) => [
 
   /**
-   * 
+   *
    * Requester routes
-   * 
-   * 
-   * 
+   *
+   *
+   *
    */
 
   {
-    path:   '/home',
+    path:   '/',
     main:   (rest) => <RequesterHome {...props} {...rest}/>,
     nav:    () => <RequesterNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/home/requests/:id',
+    path:   '/requests/:id',
     main:   (rest) => <Requests {...props} {...rest}/>,
     nav:    () => <RequesterNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/home/recommended/:id',
+    path:   '/browse/roles/:id',
     main:   (rest) => <Recommended {...props} {...rest}/>,
     nav:    () => <RequesterNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/home/packs/:id',
+    path:   '/home/recommended-roles/:id',
+    main:   (rest) => <Recommended {...props} {...rest}/>,
+    nav:    () => <RequesterNav {...props}/>,
+    exact:  true
+  },
+  {
+    path:   '/roles/:id',
     main:   (rest) => <Packs {...props} {...rest}/>,
     nav:    () => <RequesterNav {...props}/>,
     exact:  true
   },
 
-  
+
   /**
-   * 
+   *
    * Approver routes
-   * 
-   * 
-   * 
+   *
+   *
+   *
    */
 
   {
-    path:   '/approval-home',
+    path:   '/approval',
     main:   (rest) => <ApproverHome {...props} {...rest}/>,
     nav:    () => <ApproverNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/approval-home/pending/batch',
-    main:   (rest) => <Batch {...props} {...rest}/>,
-    nav:    () => <ApproverNav {...props}/>,
-    exact:  true
-  },
-  {
-    path:   '/approval-home/pending/roles',
-    main:   (rest) => <Roles {...props} {...rest}/>,
-    nav:    () => <ApproverNav {...props}/>,
-    exact:  true
-  },
-  {
-    path:   '/approval-home/pending/individuals',
+    path:   '/approval/pending/individual',
     main:   (rest) => <Individuals {...props} {...rest}/>,
     nav:    () => <ApproverNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/approval-home/pending/frequent',
-    main:   (rest) => <Frequent {...props} {...rest}/>,
+    path:   '/approval/pending/about-to-expire',
+    main:   (rest) => <Expiring {...props} {...rest}/>,
     nav:    () => <ApproverNav {...props}/>,
     exact:  true
   },
   {
-    path:   '/approval-home/pending/about-to-expire',
-    main:   (rest) => <Expiring {...props} {...rest}/>,
+    path:   '/approval/manage',
+    main:   (rest) => <Manage {...props} {...rest}/>,
+    nav:    () => <ApproverNav {...props}/>,
+    exact:  true
+  },
+  {
+    path:   '/approval/people',
+    main:   (rest) => <People {...props} {...rest}/>,
     nav:    () => <ApproverNav {...props}/>,
     exact:  true
   }

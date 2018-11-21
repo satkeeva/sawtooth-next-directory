@@ -15,7 +15,7 @@
 
 import pytest
 
-from tests.rbac.common.assertions import CommonAssertions
+from tests.rbac.common.assertions import TestAssertions
 from rbac.common.crypto.secrets import AES_KEY_PATTERN
 from rbac.common.crypto.secrets import SECRET_KEY_PATTERN
 
@@ -38,9 +38,9 @@ from rbac.app.config import VALIDATOR_ENDPOINT
 from rbac.app.config import VALIDATOR_REST_ENDPOINT
 
 
-@pytest.mark.unit
+@pytest.mark.library
 @pytest.mark.config
-class TestAppConfig(CommonAssertions):
+class TestAppConfig(TestAssertions):
     def assertIsIntString(self, value):
         self.assertIsInstance(value, str)
         self.assertEqual(str(int(value)), value)
@@ -50,7 +50,7 @@ class TestAppConfig(CommonAssertions):
         self.assertIsIntegerString(DEFAULT_CONFIG["SERVER_PORT"])
         self.assertIsString(DEFAULT_CONFIG["VALIDATOR_HOST"])
         self.assertIsIntegerString(DEFAULT_CONFIG["VALIDATOR_PORT"])
-        self.assertIsInstance(DEFAULT_CONFIG["VALIDATOR_TIMEOUT"], int)
+        self.assertIsIntegerString(DEFAULT_CONFIG["VALIDATOR_TIMEOUT"])
         self.assertIsString(DEFAULT_CONFIG["VALIDATOR_REST_HOST"])
         self.assertIsIntegerString(DEFAULT_CONFIG["VALIDATOR_REST_PORT"])
         self.assertIsString(DEFAULT_CONFIG["DB_HOST"])

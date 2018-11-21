@@ -17,18 +17,18 @@ import os
 import logging
 import binascii
 import string
-import re
+import re as regex
 import random
-from rbac.common.crypto.cipher import AES
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from rbac.common.crypto.cipher import AES
+
 
 LOGGER = logging.getLogger(__name__)
 
 AES_KEY_LENGTH = 32
-AES_KEY_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-
 SECRET_KEY_LENGTH = 36
-SECRET_KEY_PATTERN = re.compile(r"^[0-9A-Z]{36}$")
+AES_KEY_PATTERN = regex.compile(r"^[0-9a-f]{64}$")
+SECRET_KEY_PATTERN = regex.compile(r"^[0-9A-Z]{36}$")
 
 
 def generate_aes_key():
@@ -46,22 +46,24 @@ def generate_random_string(length, chars=string.ascii_uppercase + string.digits)
     return "".join(random.SystemRandom().choice(chars) for _ in range(length))
 
 
-def generate_apikey(secret_key, user_id):
+def generate_api_key(secret_key, user_id):
     serializer = Serializer(secret_key)
     token = serializer.dumps({"id": user_id})
     return token.decode("ascii")
 
 
-def deserialize_apikey(secret_key, token):
+def deserialize_api_key(secret_key, token):
     serializer = Serializer(secret_key)
     return serializer.loads(token)
 
 
+# pylint: disable=unused-argument
 def encrypt_private_key(aes_key, user_id, private_key):
     cipher = AES(aes_key)
     return cipher.encrypt(private_key)
 
 
+# pylint: disable=unused-argument
 def decrypt_private_key(aes_key, user_id, encrypted_private_key):
     cipher = AES(aes_key)
     return cipher.decrypt(encrypted_private_key)

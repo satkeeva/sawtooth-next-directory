@@ -15,45 +15,43 @@ limitations under the License.
 
 
 import React, { Component } from 'react';
-import { Grid } from 'semantic-ui-react';
-
-
-import TrackHeader from '../../components/layouts/TrackHeader';
-
-
+import { Container, Grid } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 
+import TrackHeader from '../../components/layouts/TrackHeader';
 import './RequesterHome.css';
 
 
 /**
- * 
+ *
  * @class RequesterHome
  * Component encapsulating the requester home, which serves as the
- * default landing page after login. 
- * 
+ * default landing page after login.
+ *
  */
 export default class RequesterHome extends Component {
 
-  /**
-   * 
-   * Hydrate base data
-   * 
-   */
-  componentDidMount () {
-    const { getBase } = this.props;
-    getBase();
+  componentWillMount () {
+    // const { history, recommended } = this.props;
+
+    // if (recommended && recommended[0]) {
+    //   const slug = utils.createSlug(recommended[0].name);
+    //   history.push(`/roles/${slug}`)
+    // }
+    // console.log(recommended)
+    // alert();
   }
 
 
   render () {
     return (
-      <Grid id='next-requester-grid' celled='internally'>
+      <Grid id='next-requester-grid'>
         <Grid.Column
           id='next-requester-grid-track-column'
           width={16}>
-          <TrackHeader title='Home' {...this.props}/>
+          <TrackHeader waves {...this.props}/>
+          <Container id='next-requester-landing-container'></Container>
         </Grid.Column>
       </Grid>
     );
@@ -63,7 +61,7 @@ export default class RequesterHome extends Component {
 
 
 RequesterHome.proptypes = {
-  activePack: PropTypes.arrayOf(PropTypes.shape(
+  activeRole: PropTypes.arrayOf(PropTypes.shape(
     {
       id: PropTypes.string,
       description: PropTypes.string,
@@ -72,7 +70,7 @@ RequesterHome.proptypes = {
           id: PropTypes.string,
           name: PropTypes.string,
           email: PropTypes.email
-        }  
+        }
       ))
     }
   ))
