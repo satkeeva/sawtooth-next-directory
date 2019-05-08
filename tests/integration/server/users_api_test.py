@@ -188,7 +188,7 @@ def test_user_delete_api():
         "name": "nadia one",
         "username": "nadia1",
         "password": "test11",
-        "email": "nadia1@test.com",
+        "email": "nadia123@test.com",
     }
     with requests.Session() as session:
         response = create_test_user(session, user)
@@ -223,6 +223,16 @@ def test_user_delete_api():
         assert role_owner_exists
         assert user_exists
 
+        role_admin_is_user = (
+            r.db("rbac")
+            .table("role_admins")
+            .filter({"related_id": next_id})
+            .coerce_to("array")
+            .run(conn)
+        )
+        role_admin = role_admin_is_user[0]["identifiers"][0]
+        assert role_admin == next_id
+
         deletion = session.delete("http://rbac-server:8000/api/users/" + next_id)
         time.sleep(3)
         assert deletion.json() == {
@@ -244,6 +254,13 @@ def test_user_delete_api():
             .coerce_to("array")
             .run(conn)
         )
+        role_admin_user = (
+            r.db("rbac")
+            .table("role_admins")
+            .filter({"related_id": next_id})
+            .coerce_to("array")
+            .run(conn)
+        )
 
         role_owners = (
             r.db("rbac")
@@ -256,4 +273,5 @@ def test_user_delete_api():
         conn.close()
         assert user == []
         assert metadata == []
+        assert role_admin_user == []
         assert role_owners == []
